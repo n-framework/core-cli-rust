@@ -1,4 +1,5 @@
-use core_cli_rust::{ClapAdapter, CliAdapter, CliCommandSpec, CliOptionSpec, CliSpec};
+use nframework_core_cli_abstraction::{CliAdapter, CliCommandSpec, CliOptionSpec, CliSpec};
+use nframework_core_cli_clap::ClapAdapter;
 
 #[test]
 fn parses_nested_command_and_option_values() {

@@ -1,4 +1,4 @@
-use crate::nframework_core_cli_abstraction::CliCommandSpec;
+use crate::CliCommandSpec;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliSpec {
