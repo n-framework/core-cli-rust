@@ -1,0 +1,8 @@
+[package]
+name = "nframework-core-cli-clap"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+nframework-core-cli-abstraction = { path = "../nframework-core-cli-abstraction" }
+clap = { version = "4", features = ["std", "string"] }
