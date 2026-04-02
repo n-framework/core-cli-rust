@@ -1,5 +1,9 @@
-use nframework_core_cli_abstraction::{CliAdapter, CliCommandSpec, CliOptionSpec, CliSpec};
-use nframework_core_cli_clap::ClapAdapter;
+use std::{cell::RefCell, rc::Rc};
+
+use nframework_core_cli_abstraction::{
+    CliAdapter, CliAppConfig, CliCommandSpec, CliOptionSpec, CliSpec, Command,
+};
+use nframework_core_cli_clap::{ClapAdapter, ClapCliRuntimeBuilder};
 
 #[test]
 fn parses_nested_command_and_option_values() {
@@ -48,4 +52,60 @@ fn returns_help_error_for_help_flag() {
 
     assert!(error.is_help());
     assert!(error.message().contains("Usage:"));
+}
+
+#[derive(Debug, Default)]
+struct RuntimeContext {
+    events: Rc<RefCell<Vec<String>>>,
+}
+
+#[test]
+fn runtime_dispatches_registered_handler() {
+    let events = Rc::new(RefCell::<Vec<String>>::new(Vec::new()));
+    let cli_spec = CliSpec::new("tool")
+        .require_command()
+        .with_command(CliCommandSpec::new("templates").with_subcommand(
+            CliCommandSpec::new("add")
+                .with_option(CliOptionSpec::new("name", "name").required()),
+        ));
+    let runtime = ClapCliRuntimeBuilder::new(
+        CliAppConfig::new(cli_spec),
+        RuntimeContext {
+            events: events.clone(),
+        },
+    )
+        .register_handler("templates/add", |command: &dyn Command, context: &RuntimeContext| {
+            let name = command
+                .option("name")
+                .ok_or_else(|| "missing --name".to_owned())?;
+            context.events.borrow_mut().push(name.to_owned());
+            Ok(())
+        })
+        .build();
+
+    runtime
+        .run(&[
+            "templates".to_owned(),
+            "add".to_owned(),
+            "--name".to_owned(),
+            "official".to_owned(),
+        ])
+        .expect("runtime should dispatch command");
+
+    assert_eq!(*events.borrow(), vec!["official".to_owned()]);
+}
+
+#[test]
+fn runtime_returns_error_for_unregistered_command() {
+    let cli_spec = CliSpec::new("tool")
+        .require_command()
+        .with_command(CliCommandSpec::new("templates").with_subcommand(CliCommandSpec::new("list")));
+    let runtime = ClapCliRuntimeBuilder::new(CliAppConfig::new(cli_spec), RuntimeContext::default())
+        .build();
+
+    let error = runtime
+        .run(&["templates".to_owned(), "list".to_owned()])
+        .expect_err("missing handler should return an error");
+
+    assert!(error.contains("unsupported command"));
 }
