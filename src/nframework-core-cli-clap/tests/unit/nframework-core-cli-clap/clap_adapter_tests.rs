@@ -62,26 +62,28 @@ struct RuntimeContext {
 #[test]
 fn runtime_dispatches_registered_handler() {
     let events = Rc::new(RefCell::<Vec<String>>::new(Vec::new()));
-    let cli_spec = CliSpec::new("tool")
-        .require_command()
-        .with_command(CliCommandSpec::new("templates").with_subcommand(
-            CliCommandSpec::new("add")
-                .with_option(CliOptionSpec::new("name", "name").required()),
-        ));
+    let cli_spec = CliSpec::new("tool").require_command().with_command(
+        CliCommandSpec::new("templates").with_subcommand(
+            CliCommandSpec::new("add").with_option(CliOptionSpec::new("name", "name").required()),
+        ),
+    );
     let runtime = ClapCliRuntimeBuilder::new(
         CliAppConfig::new(cli_spec),
         RuntimeContext {
             events: events.clone(),
         },
     )
-        .register_handler("templates/add", |command: &dyn Command, context: &RuntimeContext| {
+    .register_handler(
+        "templates/add",
+        |command: &dyn Command, context: &RuntimeContext| {
             let name = command
                 .option("name")
                 .ok_or_else(|| "missing --name".to_owned())?;
             context.events.borrow_mut().push(name.to_owned());
             Ok(())
-        })
-        .build();
+        },
+    )
+    .build();
 
     runtime
         .run(&[
@@ -97,11 +99,11 @@ fn runtime_dispatches_registered_handler() {
 
 #[test]
 fn runtime_returns_error_for_unregistered_command() {
-    let cli_spec = CliSpec::new("tool")
-        .require_command()
-        .with_command(CliCommandSpec::new("templates").with_subcommand(CliCommandSpec::new("list")));
-    let runtime = ClapCliRuntimeBuilder::new(CliAppConfig::new(cli_spec), RuntimeContext::default())
-        .build();
+    let cli_spec = CliSpec::new("tool").require_command().with_command(
+        CliCommandSpec::new("templates").with_subcommand(CliCommandSpec::new("list")),
+    );
+    let runtime =
+        ClapCliRuntimeBuilder::new(CliAppConfig::new(cli_spec), RuntimeContext::default()).build();
 
     let error = runtime
         .run(&["templates".to_owned(), "list".to_owned()])

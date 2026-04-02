@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use clap::{error::ErrorKind, Arg, ArgMatches, Command as ClapCommand};
+use clap::{Arg, ArgMatches, Command as ClapCommand, error::ErrorKind};
 
 use nframework_core_cli_abstraction::{
     CliAdapter, CliAdapterError, CliCommandSpec, CliOptionSpec, CliSpec, Command,
