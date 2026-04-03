@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use clap::{Arg, ArgMatches, Command as ClapCommand, error::ErrorKind};
+use clap::{Arg, ArgAction, ArgMatches, Command as ClapCommand, error::ErrorKind};
 
 use nframework_core_cli_abstraction::{
     CliAdapter, CliAdapterError, CliCommandSpec, CliOptionSpec, CliSpec, Command,
@@ -90,9 +90,17 @@ fn build_command(spec: &CliCommandSpec) -> ClapCommand {
 }
 
 fn build_option(spec: &CliOptionSpec) -> Arg {
-    let mut argument = Arg::new(spec.id.clone()).long(spec.long.clone());
+    let mut argument = Arg::new(spec.id.clone());
+    if let Some(index) = spec.positional_index {
+        argument = argument.index(index);
+    } else {
+        argument = argument.long(spec.long.clone());
+    }
     if let Some(help) = &spec.help {
         argument = argument.help(help.clone());
+    }
+    if !spec.takes_value {
+        argument = argument.action(ArgAction::SetTrue);
     }
     if spec.required {
         argument = argument.required(true);
@@ -133,8 +141,14 @@ fn collect_string_options(matches: &ArgMatches) -> BTreeMap<String, String> {
 
     for argument_id in matches.ids() {
         let name = argument_id.as_str();
-        if let Some(value) = matches.get_one::<String>(name) {
+        if let Ok(Some(value)) = matches.try_get_one::<String>(name) {
             options.insert(name.to_owned(), value.clone());
+            continue;
+        }
+        if let Ok(Some(value)) = matches.try_get_one::<bool>(name)
+            && *value
+        {
+            options.insert(name.to_owned(), "true".to_owned());
         }
     }
 
