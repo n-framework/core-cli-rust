@@ -4,7 +4,8 @@ use crate::models::SelectOption;
 /// Abstract interface for interactive CLI prompts.
 ///
 /// Implementations must be thread-safe (Send + Sync).
-/// Return `PromptError::cancelled()` when users explicitly cancel (e.g., Ctrl+C).
+/// Return `PromptError::cancelled()` when users explicitly cancel (e.g., Ctrl+C) or
+/// when the operation is interrupted (e.g., via signal).
 pub trait PromptService: Send + Sync {
     /// Returns true only when running in a TTY environment where user interaction is possible.
     fn is_interactive(&self) -> bool;
