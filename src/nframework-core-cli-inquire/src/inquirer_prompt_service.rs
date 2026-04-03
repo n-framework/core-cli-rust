@@ -7,15 +7,47 @@ use nframework_core_cli_abstraction::{PromptError, PromptService, SelectOption};
 pub struct InquirerPromptService;
 
 impl InquirerPromptService {
-    pub fn new() -> Self {
-        Self
+    pub fn new() -> Self { Self }
+
+    fn map_inquire_error(error: inquire::InquireError, context: &str) -> PromptError {
+        match error {
+            inquire::InquireError::OperationCanceled
+            | inquire::InquireError::OperationInterrupted => PromptError::cancelled(context),
+            inquire::InquireError::IO(io_err) => {
+                PromptError::io(format!("{}: {}", context, io_err))
+            }
+            _ => PromptError::internal(format!("{}: {}", context, error)),
+        }
+    }
+
+    fn select_index_internal(
+        &self,
+        message: &str,
+        options: &[SelectOption],
+        default_index: Option<usize>,
+    ) -> Result<usize, PromptError> {
+        if options.is_empty() {
+            return Err(PromptError::validation("no options available for selection"));
+        }
+
+        let display_options: Vec<String> = options.iter().map(|opt| opt.to_string()).collect();
+        let starting_cursor = default_index.unwrap_or(0).min(options.len() - 1);
+
+        let selected_index = Select::new(message, display_options)
+            .with_starting_cursor(starting_cursor)
+            .with_help_message("↑↓ to move, enter to select, type to filter")
+            .prompt()
+            .map_err(|e| Self::map_inquire_error(e, "selection failed"))?;
+
+        options
+            .iter()
+            .position(|opt| opt.to_string() == selected_index)
+            .ok_or_else(|| PromptError::internal("selected option not found in list"))
     }
 }
 
 impl Default for InquirerPromptService {
-    fn default() -> Self {
-        Self::new()
-    }
+    fn default() -> Self { Self::new() }
 }
 
 impl PromptService for InquirerPromptService {
@@ -25,101 +57,39 @@ impl PromptService for InquirerPromptService {
 
     fn text(&self, message: &str, default: Option<&str>) -> Result<String, PromptError> {
         let mut prompt = Text::new(message);
-
         if let Some(default_value) = default {
             prompt = prompt.with_default(default_value);
         }
 
-        prompt.prompt().map_err(|error| match error {
-            inquire::InquireError::OperationCanceled
-            | inquire::InquireError::OperationInterrupted => {
-                PromptError::cancelled("prompt cancelled")
-            }
-            inquire::InquireError::IO(_) => PromptError::io("io error during prompt"),
-            _ => PromptError::internal(format!("prompt failed: {error}")),
-        })
+        prompt.prompt().map_err(|e| Self::map_inquire_error(e, "prompt failed"))
     }
 
     fn confirm(&self, message: &str, default: bool) -> Result<bool, PromptError> {
         Confirm::new(message)
             .with_default(default)
             .prompt()
-            .map_err(|error| match error {
-                inquire::InquireError::OperationCanceled
-                | inquire::InquireError::OperationInterrupted => {
-                    PromptError::cancelled("prompt cancelled")
-                }
-                inquire::InquireError::IO(_) => PromptError::io("io error during prompt"),
-                _ => PromptError::internal(format!("prompt failed: {error}")),
-            })
+            .map_err(|e| Self::map_inquire_error(e, "confirmation failed"))
     }
 
     fn select(
         &self,
         message: &str,
         options: &[SelectOption],
-        default_index: usize,
+        default_index: Option<usize>,
     ) -> Result<SelectOption, PromptError> {
-        if options.is_empty() {
-            return Err(PromptError::validation(
-                "no options available for selection",
-            ));
-        }
-
-        let default_index = default_index.min(options.len() - 1);
-        let display_options: Vec<String> = options.iter().map(|opt| opt.to_string()).collect();
-
-        let selected = Select::new(message, display_options)
-            .with_starting_cursor(default_index)
-            .with_help_message("↑↓ to move, enter to select, type to filter")
-            .prompt()
-            .map_err(|error| match error {
-                inquire::InquireError::OperationCanceled
-                | inquire::InquireError::OperationInterrupted => {
-                    PromptError::cancelled("selection cancelled")
-                }
-                inquire::InquireError::IO(_) => PromptError::io("io error during selection"),
-                _ => PromptError::internal(format!("selection failed: {error}")),
-            })?;
-
+        let index = self.select_index_internal(message, options, default_index)?;
         options
-            .iter()
-            .find(|opt| opt.to_string() == selected)
+            .get(index)
             .cloned()
-            .ok_or_else(|| PromptError::internal("selected option not found in list"))
+            .ok_or_else(|| PromptError::internal("selected index out of bounds"))
     }
 
     fn select_index(
         &self,
         message: &str,
         options: &[SelectOption],
-        default_index: usize,
+        default_index: Option<usize>,
     ) -> Result<usize, PromptError> {
-        if options.is_empty() {
-            return Err(PromptError::validation(
-                "no options available for selection",
-            ));
-        }
-
-        let default_index = default_index.min(options.len() - 1);
-        let display_options: Vec<String> = options.iter().map(|opt| opt.to_string()).collect();
-
-        let selected = Select::new(message, display_options)
-            .with_starting_cursor(default_index)
-            .with_help_message("↑↓ to move, enter to select, type to filter")
-            .prompt()
-            .map_err(|error| match error {
-                inquire::InquireError::OperationCanceled
-                | inquire::InquireError::OperationInterrupted => {
-                    PromptError::cancelled("selection cancelled")
-                }
-                inquire::InquireError::IO(_) => PromptError::io("io error during selection"),
-                _ => PromptError::internal(format!("selection failed: {error}")),
-            })?;
-
-        Ok(options
-            .iter()
-            .position(|opt| opt.to_string() == selected)
-            .unwrap_or(default_index))
+        self.select_index_internal(message, options, default_index)
     }
 }

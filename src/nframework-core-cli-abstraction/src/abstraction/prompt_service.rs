@@ -1,7 +1,12 @@
 use crate::errors::PromptError;
 use crate::models::SelectOption;
 
+/// Abstract interface for interactive CLI prompts.
+///
+/// Implementations must be thread-safe (Send + Sync).
+/// Return `PromptError::cancelled()` when users explicitly cancel (e.g., Ctrl+C).
 pub trait PromptService: Send + Sync {
+    /// Returns true only when running in a TTY environment where user interaction is possible.
     fn is_interactive(&self) -> bool;
 
     fn text(&self, message: &str, default: Option<&str>) -> Result<String, PromptError>;
@@ -12,13 +17,13 @@ pub trait PromptService: Send + Sync {
         &self,
         message: &str,
         options: &[SelectOption],
-        default_index: usize,
+        default_index: Option<usize>,
     ) -> Result<SelectOption, PromptError>;
 
     fn select_index(
         &self,
         message: &str,
         options: &[SelectOption],
-        default_index: usize,
+        default_index: Option<usize>,
     ) -> Result<usize, PromptError>;
 }
