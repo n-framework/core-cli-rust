@@ -3,11 +3,16 @@ use std::io::{self, IsTerminal};
 use inquire::{Confirm, Select, Text};
 use nframework_core_cli_abstraction::{PromptError, PromptService, SelectOption};
 
+/// Help message displayed to users during selection prompts.
+const SELECT_HELP_MESSAGE: &str = "↑↓ to move, enter to select, type to filter";
+
 #[derive(Debug, Clone, Copy)]
 pub struct InquirerPromptService;
 
 impl InquirerPromptService {
-    pub fn new() -> Self { Self }
+    pub fn new() -> Self {
+        Self
+    }
 
     fn map_inquire_error(error: inquire::InquireError, context: &str) -> PromptError {
         match error {
@@ -27,7 +32,9 @@ impl InquirerPromptService {
         default_index: Option<usize>,
     ) -> Result<usize, PromptError> {
         if options.is_empty() {
-            return Err(PromptError::validation("no options available for selection"));
+            return Err(PromptError::validation(
+                "no options available for selection",
+            ));
         }
 
         let display_options: Vec<String> = options.iter().map(|opt| opt.to_string()).collect();
@@ -35,7 +42,7 @@ impl InquirerPromptService {
 
         let selected_index = Select::new(message, display_options)
             .with_starting_cursor(starting_cursor)
-            .with_help_message("↑↓ to move, enter to select, type to filter")
+            .with_help_message(SELECT_HELP_MESSAGE)
             .prompt()
             .map_err(|e| Self::map_inquire_error(e, "selection failed"))?;
 
@@ -47,7 +54,9 @@ impl InquirerPromptService {
 }
 
 impl Default for InquirerPromptService {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl PromptService for InquirerPromptService {
@@ -61,7 +70,9 @@ impl PromptService for InquirerPromptService {
             prompt = prompt.with_default(default_value);
         }
 
-        prompt.prompt().map_err(|e| Self::map_inquire_error(e, "prompt failed"))
+        prompt
+            .prompt()
+            .map_err(|e| Self::map_inquire_error(e, "prompt failed"))
     }
 
     fn confirm(&self, message: &str, default: bool) -> Result<bool, PromptError> {

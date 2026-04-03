@@ -1,5 +1,5 @@
+use nframework_core_cli_abstraction::{PromptError, PromptErrorKind, PromptService};
 use nframework_core_cli_inquire::InquirerPromptService;
-use nframework_core_cli_abstraction::{PromptError, PromptService};
 
 #[test]
 fn test_inquirer_prompt_service_is_interactive_in_tty() {
@@ -19,10 +19,7 @@ fn test_select_empty_options_returns_error() {
     let service = InquirerPromptService::new();
     let result = service.select("Choose", &[], None);
     assert!(result.is_err());
-    match result {
-        Err(PromptError { .. }) => {},
-        _ => panic!("Expected validation error"),
-    }
+    assert_eq!(result.unwrap_err().kind(), &PromptErrorKind::Validation);
 }
 
 #[test]
@@ -30,4 +27,5 @@ fn test_select_index_empty_options_returns_error() {
     let service = InquirerPromptService::new();
     let result = service.select_index("Choose", &[], None);
     assert!(result.is_err());
+    assert_eq!(result.unwrap_err().kind(), &PromptErrorKind::Validation);
 }

@@ -11,7 +11,11 @@ impl SelectOption {
         let value = value.into();
         assert!(!label.is_empty(), "label cannot be empty");
         assert!(!value.is_empty(), "value cannot be empty");
-        Self { label, value, description: None }
+        Self {
+            label,
+            value,
+            description: None,
+        }
     }
 
     #[must_use]
@@ -20,9 +24,15 @@ impl SelectOption {
         self
     }
 
-    pub fn label(&self) -> &str { &self.label }
-    pub fn value(&self) -> &str { &self.value }
-    pub fn description(&self) -> Option<&str> { self.description.as_deref() }
+    pub fn label(&self) -> &str {
+        &self.label
+    }
+    pub fn value(&self) -> &str {
+        &self.value
+    }
+    pub fn description(&self) -> Option<&str> {
+        self.description.as_deref()
+    }
 }
 
 impl std::fmt::Display for SelectOption {

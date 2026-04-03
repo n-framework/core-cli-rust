@@ -1,2 +1,2 @@
-mod models;
 mod errors;
+mod models;
