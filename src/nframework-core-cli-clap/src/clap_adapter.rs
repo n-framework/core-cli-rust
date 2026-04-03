@@ -52,9 +52,6 @@ fn build_root_command(spec: &CliSpec) -> ClapCommand {
     if let Some(about) = &spec.about {
         command = command.about(about.clone());
     }
-    if let Some(banner) = &spec.banner {
-        command = command.before_help(banner.clone());
-    }
     if spec.require_command {
         command = command
             .subcommand_required(true)
@@ -110,7 +107,9 @@ fn build_option(spec: &CliOptionSpec) -> Arg {
 
 fn map_clap_error(error: clap::Error) -> CliAdapterError {
     match error.kind() {
-        ErrorKind::DisplayHelp | ErrorKind::DisplayVersion => {
+        ErrorKind::DisplayHelp
+        | ErrorKind::DisplayVersion
+        | ErrorKind::DisplayHelpOnMissingArgumentOrSubcommand => {
             CliAdapterError::help(error.to_string())
         }
         _ => CliAdapterError::parse(error.to_string()),

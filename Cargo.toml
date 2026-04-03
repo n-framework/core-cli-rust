@@ -2,5 +2,6 @@
 members = [
   "src/nframework-core-cli-abstraction",
   "src/nframework-core-cli-clap",
+  "src/nframework-core-cli-inquire",
 ]
 resolver = "2"
