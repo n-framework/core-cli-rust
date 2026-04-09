@@ -1,4 +1,4 @@
-use nframework_core_cli_abstraction::errors::PromptError;
+use nframework_core_cli_abstractions::errors::PromptError;
 
 #[test]
 fn test_prompt_error_constructors() {

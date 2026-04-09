@@ -1,4 +1,4 @@
-use nframework_core_cli_abstraction::{PromptErrorKind, PromptService};
+use nframework_core_cli_abstractions::{PromptErrorKind, PromptService};
 use nframework_core_cli_inquire::InquirerPromptService;
 
 #[test]

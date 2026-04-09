@@ -5,4 +5,4 @@ edition = "2024"
 
 [dependencies]
 inquire = "0.7"
-nframework-core-cli-abstraction = { path = "../nframework-core-cli-abstraction" }
+nframework-core-cli-abstractions = { path = "../nframework-core-cli-abstractions" }

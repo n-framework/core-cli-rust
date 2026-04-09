@@ -1,4 +1,4 @@
-use nframework_core_cli_abstraction::models::SelectOption;
+use nframework_core_cli_abstractions::models::SelectOption;
 
 #[test]
 fn test_select_option_new() {

@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use nframework_core_cli_abstraction::{
+use nframework_core_cli_abstractions::{
     CliAdapter, CliAppConfig, CliCommandSpec, CliOptionSpec, CliSpec, Command,
 };
 use nframework_core_cli_clap::{ClapAdapter, ClapCliRuntimeBuilder};

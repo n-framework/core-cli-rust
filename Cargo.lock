@@ -234,7 +234,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "nframework-core-cli-abstraction"
+name = "nframework-core-cli-abstractions"
 version = "0.1.0"
 
 [[package]]
@@ -242,7 +242,7 @@ name = "nframework-core-cli-clap"
 version = "0.1.0"
 dependencies = [
  "clap",
- "nframework-core-cli-abstraction",
+ "nframework-core-cli-abstractions",
 ]
 
 [[package]]
@@ -250,7 +250,7 @@ name = "nframework-core-cli-inquire"
 version = "0.1.0"
 dependencies = [
  "inquire",
- "nframework-core-cli-abstraction",
+ "nframework-core-cli-abstractions",
 ]
 
 [[package]]

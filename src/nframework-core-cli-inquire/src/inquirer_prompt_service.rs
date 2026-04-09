@@ -1,7 +1,7 @@
 use std::io::{self, IsTerminal};
 
 use inquire::{Confirm, Select, Text};
-use nframework_core_cli_abstraction::{PromptError, PromptService, SelectOption};
+use nframework_core_cli_abstractions::{PromptError, PromptService, SelectOption};
 
 /// Help message displayed to users during selection prompts.
 const SELECT_HELP_MESSAGE: &str = "↑↓ to move, enter to select, type to filter";
