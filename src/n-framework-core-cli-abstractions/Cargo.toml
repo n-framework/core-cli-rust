@@ -1,4 +1,4 @@
 [package]
-name = "nframework-core-cli-abstractions"
+name = "n-framework-core-cli-abstractions"
 version = "0.1.0"
 edition = "2024"

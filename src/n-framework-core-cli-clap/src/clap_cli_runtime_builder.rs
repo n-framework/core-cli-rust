@@ -1,4 +1,4 @@
-use nframework_core_cli_abstractions::{CliAppConfig, CliRuntime, CliRuntimeHandler};
+use n_framework_core_cli_abstractions::{CliAppConfig, CliRuntime, CliRuntimeHandler};
 
 use crate::ClapAdapter;
 

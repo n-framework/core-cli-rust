@@ -1,9 +1,9 @@
 use std::{cell::RefCell, rc::Rc};
 
-use nframework_core_cli_abstractions::{
+use n_framework_core_cli_abstractions::{
     CliAdapter, CliAppConfig, CliCommandSpec, CliOptionSpec, CliSpec, Command,
 };
-use nframework_core_cli_clap::{ClapAdapter, ClapCliRuntimeBuilder};
+use n_framework_core_cli_clap::{ClapAdapter, ClapCliRuntimeBuilder};
 
 #[test]
 fn parses_nested_command_and_option_values() {

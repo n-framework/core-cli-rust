@@ -1,0 +1,8 @@
+[package]
+name = "n-framework-core-cli-inquire"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+inquire = "0.7"
+n-framework-core-cli-abstractions = { path = "../n-framework-core-cli-abstractions" }

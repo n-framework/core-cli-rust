@@ -1,5 +1,5 @@
-use nframework_core_cli_abstractions::{PromptErrorKind, PromptService};
-use nframework_core_cli_inquire::InquirerPromptService;
+use n_framework_core_cli_abstractions::{PromptErrorKind, PromptService};
+use n_framework_core_cli_inquire::InquirerPromptService;
 
 #[test]
 fn test_inquirer_prompt_service_is_interactive_in_tty() {

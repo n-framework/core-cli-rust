@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use nframework_core_cli_abstractions::Command;
+use n_framework_core_cli_abstractions::Command;
 
 #[derive(Debug, Clone)]
 pub struct ParsedCommand {
