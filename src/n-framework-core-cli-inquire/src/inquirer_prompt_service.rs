@@ -61,6 +61,10 @@ impl Default for InquirerPromptService {
 
 impl PromptService for InquirerPromptService {
     fn is_interactive(&self) -> bool {
+        if std::env::var("CI").is_ok() || std::env::var("TERM").map_or(false, |v| v == "dumb") {
+            return false;
+        }
+
         io::stdin().is_terminal() && io::stdout().is_terminal()
     }
 
