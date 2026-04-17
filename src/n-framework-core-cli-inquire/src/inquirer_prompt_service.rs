@@ -61,7 +61,12 @@ impl Default for InquirerPromptService {
 
 impl PromptService for InquirerPromptService {
     fn is_interactive(&self) -> bool {
-        if std::env::var("CI").is_ok() || std::env::var("TERM").map_or(false, |v| v == "dumb") {
+        #[cfg(test)]
+        if std::env::var("NFW_TEST_FORCE_INTERACTION").is_err() {
+            return false;
+        }
+
+        if std::env::var("CI").is_ok() || std::env::var("TERM").is_ok_and(|v| v == "dumb") {
             return false;
         }
 
