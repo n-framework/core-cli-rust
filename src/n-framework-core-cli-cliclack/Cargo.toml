@@ -1,0 +1,9 @@
+[package]
+name = "n-framework-core-cli-cliclack"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cliclack = "0.5.4"
+n-framework-core-cli-abstractions = { path = "../n-framework-core-cli-abstractions" }
+

@@ -1,7 +1,9 @@
 use std::io::{self, IsTerminal};
 
 use inquire::{Confirm, MultiSelect, Password, Select, Text};
-use n_framework_core_cli_abstractions::{PromptError, PromptService, SelectOption};
+use n_framework_core_cli_abstractions::{
+    InteractiveError, InteractivePrompt, Logger, SelectOption, Spinner,
+};
 
 /// Help message displayed to users during selection prompts.
 const SELECT_HELP_MESSAGE: &str = "↑↓ to move, enter to select, type to filter";
@@ -14,14 +16,14 @@ impl InquirerPromptService {
         Self
     }
 
-    fn map_inquire_error(error: inquire::InquireError, context: &str) -> PromptError {
+    fn map_inquire_error(error: inquire::InquireError, context: &str) -> InteractiveError {
         match error {
             inquire::InquireError::OperationCanceled
-            | inquire::InquireError::OperationInterrupted => PromptError::cancelled(context),
+            | inquire::InquireError::OperationInterrupted => InteractiveError::cancelled(context),
             inquire::InquireError::IO(io_err) => {
-                PromptError::io(format!("{}: {}", context, io_err))
+                InteractiveError::io(format!("{}: {}", context, io_err))
             }
-            _ => PromptError::internal(format!("{}: {}", context, error)),
+            _ => InteractiveError::internal(format!("{}: {}", context, error)),
         }
     }
 
@@ -30,9 +32,9 @@ impl InquirerPromptService {
         message: &str,
         options: &[SelectOption],
         default_index: Option<usize>,
-    ) -> Result<usize, PromptError> {
+    ) -> Result<usize, InteractiveError> {
         if options.is_empty() {
-            return Err(PromptError::validation(
+            return Err(InteractiveError::validation(
                 "no options available for selection",
             ));
         }
@@ -49,7 +51,7 @@ impl InquirerPromptService {
         options
             .iter()
             .position(|opt| opt.to_string() == selected_index)
-            .ok_or_else(|| PromptError::internal("selected option not found in list"))
+            .ok_or_else(|| InteractiveError::internal("selected option not found in list"))
     }
 }
 
@@ -59,7 +61,25 @@ impl Default for InquirerPromptService {
     }
 }
 
-impl PromptService for InquirerPromptService {
+struct InquirerNoopSpinner;
+
+impl Spinner for InquirerNoopSpinner {
+    fn set_message(&self, message: &str) {
+        println!("{}", message);
+    }
+    fn success(&self, message: &str) {
+        println!("✔ {}", message);
+    }
+    fn error(&self, message: &str) {
+        println!("✖ {}", message);
+    }
+    fn cancel_log(&self, message: &str) {
+        println!("- {}", message);
+    }
+    fn stop(&self, _message: &str) {}
+}
+
+impl InteractivePrompt for InquirerPromptService {
     fn is_interactive(&self) -> bool {
         #[cfg(test)]
         if std::env::var("NFW_TEST_FORCE_INTERACTION").is_err() {
@@ -73,7 +93,7 @@ impl PromptService for InquirerPromptService {
         io::stdin().is_terminal() && io::stdout().is_terminal()
     }
 
-    fn text(&self, message: &str, default: Option<&str>) -> Result<String, PromptError> {
+    fn text(&self, message: &str, default: Option<&str>) -> Result<String, InteractiveError> {
         let mut prompt = Text::new(message);
         if let Some(default_value) = default {
             prompt = prompt.with_default(default_value);
@@ -84,14 +104,14 @@ impl PromptService for InquirerPromptService {
             .map_err(|e| Self::map_inquire_error(e, "prompt failed"))
     }
 
-    fn confirm(&self, message: &str, default: bool) -> Result<bool, PromptError> {
+    fn confirm(&self, message: &str, default: bool) -> Result<bool, InteractiveError> {
         Confirm::new(message)
             .with_default(default)
             .prompt()
             .map_err(|e| Self::map_inquire_error(e, "confirmation failed"))
     }
 
-    fn password(&self, message: &str) -> Result<String, PromptError> {
+    fn password(&self, message: &str) -> Result<String, InteractiveError> {
         Password::new(message)
             .prompt()
             .map_err(|e| Self::map_inquire_error(e, "password prompt failed"))
@@ -102,12 +122,12 @@ impl PromptService for InquirerPromptService {
         message: &str,
         options: &[SelectOption],
         default_index: Option<usize>,
-    ) -> Result<SelectOption, PromptError> {
+    ) -> Result<SelectOption, InteractiveError> {
         let index = self.select_index_internal(message, options, default_index)?;
         options
             .get(index)
             .cloned()
-            .ok_or_else(|| PromptError::internal("selected index out of bounds"))
+            .ok_or_else(|| InteractiveError::internal("selected index out of bounds"))
     }
 
     fn select_index(
@@ -115,7 +135,7 @@ impl PromptService for InquirerPromptService {
         message: &str,
         options: &[SelectOption],
         default_index: Option<usize>,
-    ) -> Result<usize, PromptError> {
+    ) -> Result<usize, InteractiveError> {
         self.select_index_internal(message, options, default_index)
     }
 
@@ -124,7 +144,7 @@ impl PromptService for InquirerPromptService {
         message: &str,
         options: &[SelectOption],
         default_indices: &[usize],
-    ) -> Result<Vec<SelectOption>, PromptError> {
+    ) -> Result<Vec<SelectOption>, InteractiveError> {
         if options.is_empty() {
             return Ok(Vec::new());
         }
@@ -143,3 +163,49 @@ impl PromptService for InquirerPromptService {
             .collect())
     }
 }
+
+impl Logger for InquirerPromptService {
+    fn intro(&self, message: &str) -> Result<(), InteractiveError> {
+        println!("{}", message);
+        Ok(())
+    }
+
+    fn outro(&self, message: &str) -> Result<(), InteractiveError> {
+        println!("{}", message);
+        Ok(())
+    }
+
+    fn cancel_log(&self, message: &str) -> Result<(), InteractiveError> {
+        println!("{}", message);
+        Ok(())
+    }
+
+    fn log_info(&self, message: &str) -> Result<(), InteractiveError> {
+        println!("INFO: {}", message);
+        Ok(())
+    }
+
+    fn log_success(&self, message: &str) -> Result<(), InteractiveError> {
+        println!("SUCCESS: {}", message);
+        Ok(())
+    }
+
+    fn log_warning(&self, message: &str) -> Result<(), InteractiveError> {
+        println!("WARNING: {}", message);
+        Ok(())
+    }
+
+    fn log_error(&self, message: &str) -> Result<(), InteractiveError> {
+        println!("ERROR: {}", message);
+        Ok(())
+    }
+
+    fn spinner(&self, message: &str) -> Result<Box<dyn Spinner>, InteractiveError> {
+        println!("{}", message);
+        Ok(Box::new(InquirerNoopSpinner))
+    }
+}
+
+#[cfg(test)]
+#[path = "inquirer_prompt_service.tests.rs"]
+mod tests;
