@@ -153,3 +153,7 @@ fn collect_string_options(matches: &ArgMatches) -> BTreeMap<String, String> {
 
     options
 }
+
+#[cfg(test)]
+#[path = "clap_adapter.tests.rs"]
+mod tests;

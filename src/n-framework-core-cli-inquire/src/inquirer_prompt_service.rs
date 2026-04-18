@@ -205,3 +205,7 @@ impl Logger for InquirerPromptService {
         Ok(Box::new(InquirerNoopSpinner))
     }
 }
+
+#[cfg(test)]
+#[path = "inquirer_prompt_service.tests.rs"]
+mod tests;

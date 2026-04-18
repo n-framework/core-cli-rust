@@ -1,4 +1,4 @@
-use n_framework_core_cli_abstractions::SelectOption;
+use crate::features::interactive::models::select_option::SelectOption;
 
 #[test]
 fn test_select_option_new() {

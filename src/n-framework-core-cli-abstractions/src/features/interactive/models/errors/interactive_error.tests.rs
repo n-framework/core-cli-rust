@@ -1,4 +1,4 @@
-use n_framework_core_cli_abstractions::InteractiveError;
+use super::InteractiveError;
 
 #[test]
 fn test_prompt_error_constructors() {

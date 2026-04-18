@@ -43,3 +43,7 @@ impl std::fmt::Display for SelectOption {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "select_option.tests.rs"]
+mod tests;

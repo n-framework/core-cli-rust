@@ -64,3 +64,7 @@ impl Display for InteractiveError {
 }
 
 impl Error for InteractiveError {}
+
+#[cfg(test)]
+#[path = "interactive_error.tests.rs"]
+mod tests;

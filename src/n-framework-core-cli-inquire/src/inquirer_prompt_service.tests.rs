@@ -1,5 +1,6 @@
+use crate::InquirerPromptService;
 use n_framework_core_cli_abstractions::{InteractiveErrorKind, InteractivePrompt};
-use n_framework_core_cli_inquire::InquirerPromptService;
+
 use std::io::IsTerminal;
 
 #[test]
