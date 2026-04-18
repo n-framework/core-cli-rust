@@ -1,6 +1,6 @@
 use std::io::{self, IsTerminal};
 
-use inquire::{Confirm, Select, Text};
+use inquire::{Confirm, MultiSelect, Select, Text};
 use n_framework_core_cli_abstractions::{PromptError, PromptService, SelectOption};
 
 /// Help message displayed to users during selection prompts.
@@ -111,5 +111,29 @@ impl PromptService for InquirerPromptService {
         default_index: Option<usize>,
     ) -> Result<usize, PromptError> {
         self.select_index_internal(message, options, default_index)
+    }
+
+    fn multiselect(
+        &self,
+        message: &str,
+        options: &[SelectOption],
+        default_indices: &[usize],
+    ) -> Result<Vec<SelectOption>, PromptError> {
+        if options.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let display_options: Vec<String> = options.iter().map(|opt| opt.to_string()).collect();
+
+        let selected = MultiSelect::new(message, display_options)
+            .with_default(default_indices)
+            .with_help_message("↑↓ to move, space to toggle, enter to confirm")
+            .prompt()
+            .map_err(|e| Self::map_inquire_error(e, "multiselect failed"))?;
+
+        Ok(selected
+            .into_iter()
+            .filter_map(|label| options.iter().find(|o| o.to_string() == label).cloned())
+            .collect())
     }
 }

@@ -14,7 +14,7 @@ fn test_inquirer_prompt_service_is_interactive_in_tty() {
 
 #[test]
 fn test_inquirer_prompt_service_default() {
-    let service = InquirerPromptService::default();
+    let service = InquirerPromptService;
     if std::env::var("CI").is_ok() || !std::io::stdin().is_terminal() {
         assert!(!service.is_interactive());
     }

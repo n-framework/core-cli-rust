@@ -27,4 +27,11 @@ pub trait PromptService: Send + Sync {
         options: &[SelectOption],
         default_index: Option<usize>,
     ) -> Result<usize, PromptError>;
+
+    fn multiselect(
+        &self,
+        message: &str,
+        options: &[SelectOption],
+        default_indices: &[usize],
+    ) -> Result<Vec<SelectOption>, PromptError>;
 }
