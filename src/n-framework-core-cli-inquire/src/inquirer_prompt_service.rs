@@ -1,6 +1,6 @@
 use std::io::{self, IsTerminal};
 
-use inquire::{Confirm, MultiSelect, Select, Text};
+use inquire::{Confirm, MultiSelect, Password, Select, Text};
 use n_framework_core_cli_abstractions::{PromptError, PromptService, SelectOption};
 
 /// Help message displayed to users during selection prompts.
@@ -89,6 +89,12 @@ impl PromptService for InquirerPromptService {
             .with_default(default)
             .prompt()
             .map_err(|e| Self::map_inquire_error(e, "confirmation failed"))
+    }
+
+    fn password(&self, message: &str) -> Result<String, PromptError> {
+        Password::new(message)
+            .prompt()
+            .map_err(|e| Self::map_inquire_error(e, "password prompt failed"))
     }
 
     fn select(

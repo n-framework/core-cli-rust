@@ -14,6 +14,8 @@ pub trait PromptService: Send + Sync {
 
     fn confirm(&self, message: &str, default: bool) -> Result<bool, PromptError>;
 
+    fn password(&self, message: &str) -> Result<String, PromptError>;
+
     fn select(
         &self,
         message: &str,
