@@ -3,5 +3,6 @@ members = [
   "src/n-framework-core-cli-abstractions",
   "src/n-framework-core-cli-clap",
   "src/n-framework-core-cli-inquire",
+  "src/n-framework-core-cli-cliclack",
 ]
 resolver = "2"

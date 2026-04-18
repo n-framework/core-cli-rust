@@ -2,7 +2,7 @@ use std::error::Error;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum PromptErrorKind {
+pub enum InteractiveErrorKind {
     Cancelled,
     Io,
     Validation,
@@ -10,46 +10,46 @@ pub enum PromptErrorKind {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PromptError {
-    kind: PromptErrorKind,
+pub struct InteractiveError {
+    kind: InteractiveErrorKind,
     message: String,
 }
 
-impl PromptError {
+impl InteractiveError {
     pub fn cancelled(message: impl Into<String>) -> Self {
         Self {
-            kind: PromptErrorKind::Cancelled,
+            kind: InteractiveErrorKind::Cancelled,
             message: message.into(),
         }
     }
 
     pub fn io(message: impl Into<String>) -> Self {
         Self {
-            kind: PromptErrorKind::Io,
+            kind: InteractiveErrorKind::Io,
             message: message.into(),
         }
     }
 
     pub fn validation(message: impl Into<String>) -> Self {
         Self {
-            kind: PromptErrorKind::Validation,
+            kind: InteractiveErrorKind::Validation,
             message: message.into(),
         }
     }
 
     pub fn internal(message: impl Into<String>) -> Self {
         Self {
-            kind: PromptErrorKind::Internal,
+            kind: InteractiveErrorKind::Internal,
             message: message.into(),
         }
     }
 
-    pub fn kind(&self) -> &PromptErrorKind {
+    pub fn kind(&self) -> &InteractiveErrorKind {
         &self.kind
     }
 
     pub fn is_cancelled(&self) -> bool {
-        self.kind == PromptErrorKind::Cancelled
+        self.kind == InteractiveErrorKind::Cancelled
     }
 
     pub fn message(&self) -> &str {
@@ -57,10 +57,10 @@ impl PromptError {
     }
 }
 
-impl Display for PromptError {
+impl Display for InteractiveError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         formatter.write_str(&self.message)
     }
 }
 
-impl Error for PromptError {}
+impl Error for InteractiveError {}

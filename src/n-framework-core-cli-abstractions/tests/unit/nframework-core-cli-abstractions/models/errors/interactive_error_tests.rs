@@ -1,20 +1,20 @@
-use n_framework_core_cli_abstractions::errors::PromptError;
+use n_framework_core_cli_abstractions::InteractiveError;
 
 #[test]
 fn test_prompt_error_constructors() {
-    let cancelled = PromptError::cancelled("test");
+    let cancelled = InteractiveError::cancelled("test");
     assert!(cancelled.is_cancelled());
     assert_eq!(cancelled.message(), "test");
 
-    let io = PromptError::io("io error");
+    let io = InteractiveError::io("io error");
     assert!(!io.is_cancelled());
     assert_eq!(io.message(), "io error");
 
-    let validation = PromptError::validation("validation error");
+    let validation = InteractiveError::validation("validation error");
     assert!(!validation.is_cancelled());
     assert_eq!(validation.message(), "validation error");
 
-    let internal = PromptError::internal("internal error");
+    let internal = InteractiveError::internal("internal error");
     assert!(!internal.is_cancelled());
     assert_eq!(internal.message(), "internal error");
 }

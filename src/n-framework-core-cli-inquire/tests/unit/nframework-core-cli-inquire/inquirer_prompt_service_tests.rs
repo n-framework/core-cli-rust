@@ -1,4 +1,4 @@
-use n_framework_core_cli_abstractions::{PromptErrorKind, PromptService};
+use n_framework_core_cli_abstractions::{InteractiveErrorKind, InteractivePrompt};
 use n_framework_core_cli_inquire::InquirerPromptService;
 use std::io::IsTerminal;
 
@@ -25,7 +25,10 @@ fn test_select_empty_options_returns_error() {
     let service = InquirerPromptService::new();
     let result = service.select("Choose", &[], None);
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err().kind(), &PromptErrorKind::Validation);
+    assert_eq!(
+        result.unwrap_err().kind(),
+        &InteractiveErrorKind::Validation
+    );
 }
 
 #[test]
@@ -33,5 +36,8 @@ fn test_select_index_empty_options_returns_error() {
     let service = InquirerPromptService::new();
     let result = service.select_index("Choose", &[], None);
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err().kind(), &PromptErrorKind::Validation);
+    assert_eq!(
+        result.unwrap_err().kind(),
+        &InteractiveErrorKind::Validation
+    );
 }
