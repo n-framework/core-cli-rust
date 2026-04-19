@@ -61,22 +61,53 @@ impl Default for InquirerPromptService {
     }
 }
 
-struct InquirerNoopSpinner;
+struct InquirerConsoleSpinner {
+    message: std::sync::RwLock<String>,
+    finished: std::sync::atomic::AtomicBool,
+}
 
-impl Spinner for InquirerNoopSpinner {
+impl Spinner for InquirerConsoleSpinner {
     fn set_message(&self, message: &str) {
-        println!("{}", message);
+        if !self.finished.load(std::sync::atomic::Ordering::SeqCst) {
+            *self.message.write().unwrap() = message.to_string();
+            println!("... {}", message);
+        }
     }
     fn success(&self, message: &str) {
-        println!("✔ {}", message);
+        if !self
+            .finished
+            .swap(true, std::sync::atomic::Ordering::SeqCst)
+        {
+            println!("✔ {}", message);
+        }
     }
     fn error(&self, message: &str) {
-        println!("✖ {}", message);
+        if !self
+            .finished
+            .swap(true, std::sync::atomic::Ordering::SeqCst)
+        {
+            println!("✖ {}", message);
+        }
     }
     fn cancel_log(&self, message: &str) {
-        println!("- {}", message);
+        if !self
+            .finished
+            .swap(true, std::sync::atomic::Ordering::SeqCst)
+        {
+            println!("- {}", message);
+        }
     }
-    fn stop(&self, _message: &str) {}
+    fn stop(&self, message: &str) {
+        if !self
+            .finished
+            .swap(true, std::sync::atomic::Ordering::SeqCst)
+        {
+            println!("{}", message);
+        }
+    }
+    fn is_finished(&self) -> bool {
+        self.finished.load(std::sync::atomic::Ordering::SeqCst)
+    }
 }
 
 impl InteractivePrompt for InquirerPromptService {
@@ -201,8 +232,11 @@ impl Logger for InquirerPromptService {
     }
 
     fn spinner(&self, message: &str) -> Result<Box<dyn Spinner>, InteractiveError> {
-        println!("{}", message);
-        Ok(Box::new(InquirerNoopSpinner))
+        println!("... {}", message);
+        Ok(Box::new(InquirerConsoleSpinner {
+            message: std::sync::RwLock::new(message.to_string()),
+            finished: std::sync::atomic::AtomicBool::new(false),
+        }))
     }
 }
 
