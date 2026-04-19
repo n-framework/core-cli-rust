@@ -2,8 +2,9 @@ use std::io::{self, IsTerminal};
 
 use inquire::{Confirm, MultiSelect, Password, Select, Text};
 use n_framework_core_cli_abstractions::{
-    InteractiveError, InteractivePrompt, Logger, LoggingError, SelectOption, Spinner,
+    InteractiveError, InteractivePrompt, SelectOption,
 };
+
 
 /// Help message displayed to users during selection prompts.
 const SELECT_HELP_MESSAGE: &str = "↑↓ to move, enter to select, type to filter";
@@ -61,55 +62,6 @@ impl Default for InquirerPromptService {
     }
 }
 
-struct InquirerConsoleSpinner {
-    message: std::sync::RwLock<String>,
-    finished: std::sync::atomic::AtomicBool,
-}
-
-impl Spinner for InquirerConsoleSpinner {
-    fn set_message(&self, message: &str) {
-        if !self.finished.load(std::sync::atomic::Ordering::SeqCst) {
-            *self.message.write().unwrap() = message.to_string();
-            println!("... {}", message);
-        }
-    }
-    fn success(&self, message: &str) {
-        if !self
-            .finished
-            .swap(true, std::sync::atomic::Ordering::SeqCst)
-        {
-            println!("✔ {}", message);
-        }
-    }
-    fn error(&self, message: &str) {
-        if !self
-            .finished
-            .swap(true, std::sync::atomic::Ordering::SeqCst)
-        {
-            println!("✖ {}", message);
-        }
-    }
-    fn cancel(&self, message: &str) {
-        if !self
-            .finished
-            .swap(true, std::sync::atomic::Ordering::SeqCst)
-        {
-            println!("- {}", message);
-        }
-    }
-
-    fn stop(&self, message: &str) {
-        if !self
-            .finished
-            .swap(true, std::sync::atomic::Ordering::SeqCst)
-        {
-            println!("{}", message);
-        }
-    }
-    fn is_finished(&self) -> bool {
-        self.finished.load(std::sync::atomic::Ordering::SeqCst)
-    }
-}
 
 impl InteractivePrompt for InquirerPromptService {
     fn is_interactive(&self) -> bool {
@@ -196,51 +148,8 @@ impl InteractivePrompt for InquirerPromptService {
     }
 }
 
-impl Logger for InquirerPromptService {
-    fn intro(&self, message: &str) -> Result<(), LoggingError> {
-        println!("{}", message);
-        Ok(())
-    }
-
-    fn outro(&self, message: &str) -> Result<(), LoggingError> {
-        println!("{}", message);
-        Ok(())
-    }
-
-    fn log_cancel(&self, message: &str) -> Result<(), LoggingError> {
-        println!("{}", message);
-        Ok(())
-    }
-
-    fn log_info(&self, message: &str) -> Result<(), LoggingError> {
-        println!("INFO: {}", message);
-        Ok(())
-    }
-
-    fn log_success(&self, message: &str) -> Result<(), LoggingError> {
-        println!("SUCCESS: {}", message);
-        Ok(())
-    }
-
-    fn log_warning(&self, message: &str) -> Result<(), LoggingError> {
-        println!("WARNING: {}", message);
-        Ok(())
-    }
-
-    fn log_error(&self, message: &str) -> Result<(), LoggingError> {
-        println!("ERROR: {}", message);
-        Ok(())
-    }
-
-    fn spinner(&self, message: &str) -> Result<Box<dyn Spinner>, LoggingError> {
-        println!("... {}", message);
-        Ok(Box::new(InquirerConsoleSpinner {
-            message: std::sync::RwLock::new(message.to_string()),
-            finished: std::sync::atomic::AtomicBool::new(false),
-        }))
-    }
-}
 
 #[cfg(test)]
+
 #[path = "inquirer_prompt_service.tests.rs"]
 mod tests;
