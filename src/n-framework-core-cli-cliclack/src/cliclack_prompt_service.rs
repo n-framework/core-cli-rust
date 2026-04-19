@@ -15,27 +15,51 @@ impl Spinner for CliclackSpinner {
     }
 
     fn success(&self, message: &str) {
-        if let Some(pb) = self.inner.lock().unwrap().take() {
+        let mut inner = match self.inner.lock() {
+            Ok(guard) => guard,
+            Err(poisoned) => poisoned.into_inner(),
+        };
+        if let Some(pb) = inner.take() {
             pb.stop(message);
         }
     }
 
     fn error(&self, message: &str) {
-        if let Some(pb) = self.inner.lock().unwrap().take() {
+        let mut inner = match self.inner.lock() {
+            Ok(guard) => guard,
+            Err(poisoned) => poisoned.into_inner(),
+        };
+        if let Some(pb) = inner.take() {
             pb.error(message);
         }
     }
 
     fn cancel_log(&self, message: &str) {
-        if let Some(pb) = self.inner.lock().unwrap().take() {
+        let mut inner = match self.inner.lock() {
+            Ok(guard) => guard,
+            Err(poisoned) => poisoned.into_inner(),
+        };
+        if let Some(pb) = inner.take() {
             pb.cancel(message);
         }
     }
 
     fn stop(&self, message: &str) {
-        if let Some(pb) = self.inner.lock().unwrap().take() {
+        let mut inner = match self.inner.lock() {
+            Ok(guard) => guard,
+            Err(poisoned) => poisoned.into_inner(),
+        };
+        if let Some(pb) = inner.take() {
             pb.stop(message);
         }
+    }
+
+    fn is_finished(&self) -> bool {
+        let inner = match self.inner.lock() {
+            Ok(guard) => guard,
+            Err(poisoned) => poisoned.into_inner(),
+        };
+        inner.is_none()
     }
 }
 
@@ -48,12 +72,21 @@ impl CliclackPromptService {
     }
 
     fn map_cliclack_error(error: std::io::Error, context: &str) -> InteractiveError {
-        // Cliclack functions just return std::io::Error
-        // In cliclack, cancel uses std::io::ErrorKind::Interrupted.
+        // Cliclack functions just return std::io::Error.
+        // For Interrupted (ctrl+c), we map to Cancelled.
         if error.kind() == std::io::ErrorKind::Interrupted {
             InteractiveError::cancelled(context)
         } else {
+            // Preserve the original error message from io::Error
             InteractiveError::io(format!("{}: {}", context, error))
+        }
+    }
+
+    fn format_option_label(opt: &SelectOption) -> String {
+        if let Some(desc) = opt.description() {
+            format!("{} - {}", opt.label(), desc)
+        } else {
+            opt.label().to_string()
         }
     }
 }
@@ -108,7 +141,14 @@ impl InteractivePrompt for CliclackPromptService {
         options: &[SelectOption],
         default_index: Option<usize>,
     ) -> Result<SelectOption, InteractiveError> {
+        if options.is_empty() {
+            return Err(InteractiveError::validation(
+                "no options available for selection",
+            ));
+        }
+
         let mut prompt = cliclack::select(message);
+
         for opt in options.iter() {
             let label = if let Some(desc) = opt.description() {
                 format!("{} - {}", opt.label(), desc)
@@ -152,15 +192,16 @@ impl InteractivePrompt for CliclackPromptService {
 
         let mut prompt = cliclack::multiselect(message);
         for opt in options.iter() {
-            let label = if let Some(desc) = opt.description() {
-                format!("{} - {}", opt.label(), desc)
-            } else {
-                opt.label().to_string()
-            };
-            let _is_default =
-                default_indices.contains(&options.iter().position(|x| x == opt).unwrap());
+            let label = Self::format_option_label(opt);
             prompt = prompt.item(opt.clone(), label, "");
-            // Note: cliclack 0.3 multiselect default selections might be handled differently, maybe initial_values.
+        }
+
+        if !default_indices.is_empty() {
+            let initial_values: Vec<SelectOption> = default_indices
+                .iter()
+                .filter_map(|&i| options.get(i).cloned())
+                .collect();
+            prompt = prompt.initial_values(initial_values);
         }
 
         prompt
@@ -206,3 +247,7 @@ impl Logger for CliclackPromptService {
         }))
     }
 }
+
+#[cfg(test)]
+#[path = "cliclack_prompt_service.tests.rs"]
+mod tests;
