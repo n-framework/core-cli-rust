@@ -31,7 +31,7 @@ impl Default for CliclackPromptService {
 impl InteractivePrompt for CliclackPromptService {
     fn is_interactive(&self) -> bool {
         #[cfg(test)]
-        if std::env::var("NFW_TEST_FORCE_INTERACTION").is_err() {
+        if std::env::var("CORE_CLI_FORCE_INTERACTIVE").is_err() {
             return false;
         }
 
