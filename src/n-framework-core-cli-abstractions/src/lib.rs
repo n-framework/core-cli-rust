@@ -20,3 +20,4 @@ pub use features::interactive::models::select_option::SelectOption;
 
 pub use features::logging::abstractions::logger::Logger;
 pub use features::logging::abstractions::spinner::Spinner;
+pub use features::logging::models::errors::logging_error::{LoggingError, LoggingErrorKind};

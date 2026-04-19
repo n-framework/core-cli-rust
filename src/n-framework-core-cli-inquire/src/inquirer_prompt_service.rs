@@ -2,7 +2,7 @@ use std::io::{self, IsTerminal};
 
 use inquire::{Confirm, MultiSelect, Password, Select, Text};
 use n_framework_core_cli_abstractions::{
-    InteractiveError, InteractivePrompt, Logger, SelectOption, Spinner,
+    InteractiveError, InteractivePrompt, Logger, LoggingError, SelectOption, Spinner,
 };
 
 /// Help message displayed to users during selection prompts.
@@ -89,7 +89,7 @@ impl Spinner for InquirerConsoleSpinner {
             println!("✖ {}", message);
         }
     }
-    fn cancel_log(&self, message: &str) {
+    fn cancel(&self, message: &str) {
         if !self
             .finished
             .swap(true, std::sync::atomic::Ordering::SeqCst)
@@ -97,6 +97,7 @@ impl Spinner for InquirerConsoleSpinner {
             println!("- {}", message);
         }
     }
+
     fn stop(&self, message: &str) {
         if !self
             .finished
@@ -196,42 +197,42 @@ impl InteractivePrompt for InquirerPromptService {
 }
 
 impl Logger for InquirerPromptService {
-    fn intro(&self, message: &str) -> Result<(), InteractiveError> {
+    fn intro(&self, message: &str) -> Result<(), LoggingError> {
         println!("{}", message);
         Ok(())
     }
 
-    fn outro(&self, message: &str) -> Result<(), InteractiveError> {
+    fn outro(&self, message: &str) -> Result<(), LoggingError> {
         println!("{}", message);
         Ok(())
     }
 
-    fn cancel_log(&self, message: &str) -> Result<(), InteractiveError> {
+    fn log_cancel(&self, message: &str) -> Result<(), LoggingError> {
         println!("{}", message);
         Ok(())
     }
 
-    fn log_info(&self, message: &str) -> Result<(), InteractiveError> {
+    fn log_info(&self, message: &str) -> Result<(), LoggingError> {
         println!("INFO: {}", message);
         Ok(())
     }
 
-    fn log_success(&self, message: &str) -> Result<(), InteractiveError> {
+    fn log_success(&self, message: &str) -> Result<(), LoggingError> {
         println!("SUCCESS: {}", message);
         Ok(())
     }
 
-    fn log_warning(&self, message: &str) -> Result<(), InteractiveError> {
+    fn log_warning(&self, message: &str) -> Result<(), LoggingError> {
         println!("WARNING: {}", message);
         Ok(())
     }
 
-    fn log_error(&self, message: &str) -> Result<(), InteractiveError> {
+    fn log_error(&self, message: &str) -> Result<(), LoggingError> {
         println!("ERROR: {}", message);
         Ok(())
     }
 
-    fn spinner(&self, message: &str) -> Result<Box<dyn Spinner>, InteractiveError> {
+    fn spinner(&self, message: &str) -> Result<Box<dyn Spinner>, LoggingError> {
         println!("... {}", message);
         Ok(Box::new(InquirerConsoleSpinner {
             message: std::sync::RwLock::new(message.to_string()),

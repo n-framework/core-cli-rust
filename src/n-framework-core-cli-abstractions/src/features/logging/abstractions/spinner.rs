@@ -9,7 +9,7 @@ pub trait Spinner: Send + Sync {
     fn error(&self, message: &str);
 
     /// Cancels the spinner (typically leaves it in a warning or default state).
-    fn cancel_log(&self, message: &str);
+    fn cancel(&self, message: &str);
 
     /// Updates the text of the spinner without completing it.
     fn set_message(&self, message: &str);
