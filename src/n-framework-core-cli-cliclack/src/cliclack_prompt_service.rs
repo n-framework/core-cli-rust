@@ -20,14 +20,6 @@ impl CliclackPromptService {
             InteractiveError::io(format!("{}: {}", context, error))
         }
     }
-
-    fn format_option_label(opt: &SelectOption) -> String {
-        if let Some(desc) = opt.description() {
-            format!("{} - {}", opt.label(), desc)
-        } else {
-            opt.label().to_string()
-        }
-    }
 }
 
 impl Default for CliclackPromptService {
@@ -89,7 +81,7 @@ impl InteractivePrompt for CliclackPromptService {
         let mut prompt = cliclack::select(message);
 
         for opt in options.iter() {
-            prompt = prompt.item(opt.clone(), Self::format_option_label(opt), "");
+            prompt = prompt.item(opt.clone(), opt.label(), opt.description().unwrap_or(""));
         }
 
         if let Some(opt) = default_index.and_then(|idx| options.get(idx)) {
@@ -124,10 +116,56 @@ impl InteractivePrompt for CliclackPromptService {
             return Ok(Vec::new());
         }
 
+        struct MultiselectHintTheme;
+
+        impl cliclack::Theme for MultiselectHintTheme {
+            fn format_footer_with_message(
+                &self,
+                state: &cliclack::ThemeState,
+                message: &str,
+            ) -> String {
+                let msg = match state {
+                    cliclack::ThemeState::Active => {
+                        if message.is_empty() {
+                            "\x1b[90m↑↓ to move, space to toggle, enter to confirm\x1b[0m"
+                                .to_string()
+                        } else {
+                            format!(
+                                "{} \x1b[90m(↑↓ to move, space to toggle, enter to confirm)\x1b[0m",
+                                message
+                            )
+                        }
+                    }
+                    _ => message.to_string(),
+                };
+
+                let color_code = match state {
+                    cliclack::ThemeState::Active => "\x1b[36m",
+                    cliclack::ThemeState::Cancel => "\x1b[31m",
+                    cliclack::ThemeState::Submit => "\x1b[90m",
+                    cliclack::ThemeState::Error(_) => "\x1b[33m",
+                };
+                let reset = "\x1b[0m";
+
+                let formatted = match state {
+                    cliclack::ThemeState::Active => format!("{color_code}└{reset}  {msg}"),
+                    cliclack::ThemeState::Cancel => {
+                        format!("{color_code}└{reset}  Operation cancelled.")
+                    }
+                    cliclack::ThemeState::Submit => format!("{color_code}│{reset}"),
+                    cliclack::ThemeState::Error(err) => format!("{color_code}└{reset}  {err}"),
+                };
+
+                format!("{}\n", formatted)
+            }
+        }
+
+        cliclack::set_theme(MultiselectHintTheme);
+
         let mut prompt = cliclack::multiselect(message);
+
         for opt in options.iter() {
-            let label = Self::format_option_label(opt);
-            prompt = prompt.item(opt.clone(), label, "");
+            prompt = prompt.item(opt.clone(), opt.label(), opt.description().unwrap_or(""));
         }
 
         if !default_indices.is_empty() {
@@ -138,9 +176,13 @@ impl InteractivePrompt for CliclackPromptService {
             prompt = prompt.initial_values(initial_values);
         }
 
-        prompt
+        let result = prompt
             .interact()
-            .map_err(|e| Self::map_cliclack_error(e, "multiselect failed"))
+            .map_err(|e| Self::map_cliclack_error(e, "multiselect failed"));
+
+        cliclack::reset_theme();
+
+        result
     }
 }
 

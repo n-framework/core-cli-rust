@@ -1,7 +1,5 @@
 use super::CliclackPromptService;
-use n_framework_core_cli_abstractions::{
-    InteractiveErrorKind, InteractivePrompt, SelectOption, Spinner,
-};
+use n_framework_core_cli_abstractions::{InteractiveErrorKind, InteractivePrompt, Spinner};
 use std::io;
 
 #[test]
@@ -15,17 +13,6 @@ fn test_cliclack_select_empty_options_returns_error() {
     );
 }
 
-#[test]
-fn test_cliclack_format_option_label() {
-    let opt = SelectOption::new("Label", "value");
-    assert_eq!(CliclackPromptService::format_option_label(&opt), "Label");
-
-    let opt_with_desc = SelectOption::new("Label", "value").with_description("Description");
-    assert_eq!(
-        CliclackPromptService::format_option_label(&opt_with_desc),
-        "Label - Description"
-    );
-}
 #[test]
 fn test_cliclack_select_index_empty_options_returns_error() {
     let service = CliclackPromptService::new();
