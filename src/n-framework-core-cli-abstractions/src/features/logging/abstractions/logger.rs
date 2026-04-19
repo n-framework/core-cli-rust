@@ -16,6 +16,9 @@ pub trait Logger: Send + Sync {
     /// Prints a simple informational message.
     fn log_info(&self, message: &str) -> Result<(), LoggingError>;
 
+    /// Prints a step message (typically with a diamond).
+    fn log_step(&self, message: &str) -> Result<(), LoggingError>;
+
     /// Prints a success message (typically with a checkmark).
     fn log_success(&self, message: &str) -> Result<(), LoggingError>;
 
