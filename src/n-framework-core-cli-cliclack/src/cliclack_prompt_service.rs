@@ -2,7 +2,7 @@ use std::io::{self, IsTerminal};
 use std::sync::Mutex;
 
 use n_framework_core_cli_abstractions::{
-    InteractiveError, InteractivePrompt, Logger, SelectOption, Spinner,
+    InteractiveError, InteractivePrompt, Logger, LoggingError, SelectOption, Spinner,
 };
 
 pub struct CliclackSpinner {
@@ -34,7 +34,7 @@ impl Spinner for CliclackSpinner {
         }
     }
 
-    fn cancel_log(&self, message: &str) {
+    fn cancel(&self, message: &str) {
         let mut inner = match self.inner.lock() {
             Ok(guard) => guard,
             Err(poisoned) => poisoned.into_inner(),
@@ -150,12 +150,7 @@ impl InteractivePrompt for CliclackPromptService {
         let mut prompt = cliclack::select(message);
 
         for opt in options.iter() {
-            let label = if let Some(desc) = opt.description() {
-                format!("{} - {}", opt.label(), desc)
-            } else {
-                opt.label().to_string()
-            };
-            prompt = prompt.item(opt.clone(), label, "");
+            prompt = prompt.item(opt.clone(), Self::format_option_label(opt), "");
         }
 
         if let Some(opt) = default_index.and_then(|idx| options.get(idx)) {
@@ -211,35 +206,35 @@ impl InteractivePrompt for CliclackPromptService {
 }
 
 impl Logger for CliclackPromptService {
-    fn intro(&self, message: &str) -> Result<(), InteractiveError> {
-        cliclack::intro(message).map_err(|e| Self::map_cliclack_error(e, "intro failed"))
+    fn intro(&self, message: &str) -> Result<(), LoggingError> {
+        cliclack::intro(message).map_err(|e| LoggingError::io(e.to_string()))
     }
 
-    fn outro(&self, message: &str) -> Result<(), InteractiveError> {
-        cliclack::outro(message).map_err(|e| Self::map_cliclack_error(e, "outro failed"))
+    fn outro(&self, message: &str) -> Result<(), LoggingError> {
+        cliclack::outro(message).map_err(|e| LoggingError::io(e.to_string()))
     }
 
-    fn cancel_log(&self, message: &str) -> Result<(), InteractiveError> {
-        cliclack::outro_cancel(message).map_err(|e| Self::map_cliclack_error(e, "cancel failed"))
+    fn log_cancel(&self, message: &str) -> Result<(), LoggingError> {
+        cliclack::outro_cancel(message).map_err(|e| LoggingError::io(e.to_string()))
     }
 
-    fn log_info(&self, message: &str) -> Result<(), InteractiveError> {
-        cliclack::log::info(message).map_err(|e| Self::map_cliclack_error(e, "log failed"))
+    fn log_info(&self, message: &str) -> Result<(), LoggingError> {
+        cliclack::log::info(message).map_err(|e| LoggingError::io(e.to_string()))
     }
 
-    fn log_success(&self, message: &str) -> Result<(), InteractiveError> {
-        cliclack::log::success(message).map_err(|e| Self::map_cliclack_error(e, "log failed"))
+    fn log_success(&self, message: &str) -> Result<(), LoggingError> {
+        cliclack::log::success(message).map_err(|e| LoggingError::io(e.to_string()))
     }
 
-    fn log_warning(&self, message: &str) -> Result<(), InteractiveError> {
-        cliclack::log::warning(message).map_err(|e| Self::map_cliclack_error(e, "log failed"))
+    fn log_warning(&self, message: &str) -> Result<(), LoggingError> {
+        cliclack::log::warning(message).map_err(|e| LoggingError::io(e.to_string()))
     }
 
-    fn log_error(&self, message: &str) -> Result<(), InteractiveError> {
-        cliclack::log::error(message).map_err(|e| Self::map_cliclack_error(e, "log failed"))
+    fn log_error(&self, message: &str) -> Result<(), LoggingError> {
+        cliclack::log::error(message).map_err(|e| LoggingError::io(e.to_string()))
     }
 
-    fn spinner(&self, message: &str) -> Result<Box<dyn Spinner>, InteractiveError> {
+    fn spinner(&self, message: &str) -> Result<Box<dyn Spinner>, LoggingError> {
         let pb = cliclack::spinner();
         pb.start(message);
         Ok(Box::new(CliclackSpinner {
