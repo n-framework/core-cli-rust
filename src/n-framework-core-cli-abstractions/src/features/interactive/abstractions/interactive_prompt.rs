@@ -15,6 +15,9 @@ pub trait InteractivePrompt: Send + Sync {
     fn password(&self, message: &str) -> Result<String, InteractiveError>;
 
     /// Prompts the user to select an option from a list, returning the selected option.
+    ///
+    /// # Errors
+    /// Returns a validation error if `default_index` is provided but is out of bounds.
     fn select(
         &self,
         message: &str,
@@ -23,6 +26,9 @@ pub trait InteractivePrompt: Send + Sync {
     ) -> Result<SelectOption, InteractiveError>;
 
     /// Prompts the user to select an option from a list, returning the index of the selected option.
+    ///
+    /// # Errors
+    /// Returns a validation error if `default_index` is provided but is out of bounds.
     fn select_index(
         &self,
         message: &str,
@@ -31,6 +37,9 @@ pub trait InteractivePrompt: Send + Sync {
     ) -> Result<usize, InteractiveError>;
 
     /// Prompts the user to select multiple options from a list.
+    ///
+    /// # Errors
+    /// Returns a validation error if any index in `default_indices` is out of bounds.
     fn multiselect(
         &self,
         message: &str,

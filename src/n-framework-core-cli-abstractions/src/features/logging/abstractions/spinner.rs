@@ -13,4 +13,7 @@ pub trait Spinner: Send + Sync {
 
     /// Updates the text of the spinner without completing it.
     fn set_message(&self, message: &str);
+
+    /// Returns true if the spinner has been completed (success, error, or stopped).
+    fn is_finished(&self) -> bool;
 }

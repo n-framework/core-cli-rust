@@ -1,17 +1,25 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// Represents the category of an interactive error.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InteractiveErrorKind {
+    /// Operation was cancelled by the user.
     Cancelled,
+    /// An underlying I/O error occurred.
     Io,
+    /// User input or configuration failed validation.
     Validation,
+    /// An unexpected internal system error occurred.
     Internal,
 }
 
+/// A unified error type for all interactive CLI operations.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InteractiveError {
+    /// The category of the error.
     kind: InteractiveErrorKind,
+    /// A human-readable message describing the error.
     message: String,
 }
 

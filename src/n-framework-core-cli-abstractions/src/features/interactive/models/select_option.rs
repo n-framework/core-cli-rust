@@ -1,4 +1,7 @@
+use crate::features::interactive::models::errors::interactive_error::InteractiveError;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
+
 pub struct SelectOption {
     label: String,
     value: String,
@@ -6,16 +9,38 @@ pub struct SelectOption {
 }
 
 impl SelectOption {
+    /// Creates a new SelectOption and validates that label and value are not empty.
+    ///
+    /// # Panics
+    /// Panics if label or value is empty. Use `try_new` for a non-panicking version.
     pub fn new(label: impl Into<String>, value: impl Into<String>) -> Self {
+        Self::try_new(label, value).expect("SelectOption label and value cannot be empty")
+    }
+
+    /// Safely creates a new SelectOption, returning an error if label or value is empty.
+    pub fn try_new(
+        label: impl Into<String>,
+        value: impl Into<String>,
+    ) -> Result<Self, InteractiveError> {
         let label = label.into();
         let value = value.into();
-        assert!(!label.is_empty(), "label cannot be empty");
-        assert!(!value.is_empty(), "value cannot be empty");
-        Self {
+
+        if label.trim().is_empty() {
+            return Err(InteractiveError::validation(
+                "SelectOption label cannot be empty",
+            ));
+        }
+        if value.trim().is_empty() {
+            return Err(InteractiveError::validation(
+                "SelectOption value cannot be empty",
+            ));
+        }
+
+        Ok(Self {
             label,
             value,
             description: None,
-        }
+        })
     }
 
     #[must_use]
