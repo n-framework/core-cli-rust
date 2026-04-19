@@ -52,7 +52,7 @@ fn test_cliclack_map_error() {
 
 #[test]
 fn test_cliclack_spinner_poison_recovery() {
-    use super::CliclackSpinner;
+    use crate::cliclack_spinner::CliclackSpinner;
     use std::sync::Mutex;
 
     let spinner = CliclackSpinner {
