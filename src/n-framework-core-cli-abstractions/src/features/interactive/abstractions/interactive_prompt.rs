@@ -16,6 +16,9 @@ pub trait InteractivePrompt: Send + Sync {
 
     /// Prompts the user to select an option from a list, returning the selected option.
     ///
+    /// # Requirements
+    /// All `SelectOption` items in the `options` slice must have unique identifiers.
+    ///
     /// # Errors
     /// Returns a validation error if `default_index` is provided but is out of bounds.
     fn select(
@@ -26,6 +29,10 @@ pub trait InteractivePrompt: Send + Sync {
     ) -> Result<SelectOption, InteractiveError>;
 
     /// Prompts the user to select an option from a list, returning the index of the selected option.
+    ///
+    /// # Requirements
+    /// All `SelectOption` items in the `options` slice must have unique identifiers.
+    /// Some implementations use value-based reverse lookup to determine the selected index.
     ///
     /// # Errors
     /// Returns a validation error if `default_index` is provided but is out of bounds.
