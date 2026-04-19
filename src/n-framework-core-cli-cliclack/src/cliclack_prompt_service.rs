@@ -1,12 +1,9 @@
 use std::io::{self, IsTerminal};
 
-use n_framework_core_cli_abstractions::{
-    InteractiveError, InteractivePrompt, SelectOption,
-};
+use n_framework_core_cli_abstractions::{InteractiveError, InteractivePrompt, SelectOption};
 
 #[derive(Debug, Clone, Copy)]
 pub struct CliclackPromptService;
-
 
 impl CliclackPromptService {
     pub fn new() -> Self {
@@ -147,8 +144,6 @@ impl InteractivePrompt for CliclackPromptService {
     }
 }
 
-
 #[cfg(test)]
-
 #[path = "cliclack_prompt_service.tests.rs"]
 mod tests;

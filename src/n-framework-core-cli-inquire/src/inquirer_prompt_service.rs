@@ -1,10 +1,7 @@
 use std::io::{self, IsTerminal};
 
 use inquire::{Confirm, MultiSelect, Password, Select, Text};
-use n_framework_core_cli_abstractions::{
-    InteractiveError, InteractivePrompt, SelectOption,
-};
-
+use n_framework_core_cli_abstractions::{InteractiveError, InteractivePrompt, SelectOption};
 
 /// Help message displayed to users during selection prompts.
 const SELECT_HELP_MESSAGE: &str = "↑↓ to move, enter to select, type to filter";
@@ -61,7 +58,6 @@ impl Default for InquirerPromptService {
         Self::new()
     }
 }
-
 
 impl InteractivePrompt for InquirerPromptService {
     fn is_interactive(&self) -> bool {
@@ -148,8 +144,6 @@ impl InteractivePrompt for InquirerPromptService {
     }
 }
 
-
 #[cfg(test)]
-
 #[path = "inquirer_prompt_service.tests.rs"]
 mod tests;

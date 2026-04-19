@@ -1,5 +1,5 @@
-use std::sync::Mutex;
 use n_framework_core_cli_abstractions::Spinner;
+use std::sync::Mutex;
 
 pub struct CliclackSpinner {
     pub(crate) inner: Mutex<Option<cliclack::ProgressBar>>,

@@ -1,8 +1,8 @@
-use std::sync::atomic::AtomicBool;
-use std::sync::RwLock;
-use n_framework_core_cli_abstractions::{Logger, LoggingError, Spinner};
 use super::inquirer_prompt_service::InquirerPromptService;
 use super::inquirer_spinner::InquirerConsoleSpinner;
+use n_framework_core_cli_abstractions::{Logger, LoggingError, Spinner};
+use std::sync::RwLock;
+use std::sync::atomic::AtomicBool;
 
 impl Logger for InquirerPromptService {
     fn intro(&self, message: &str) -> Result<(), LoggingError> {

@@ -1,7 +1,7 @@
-use n_framework_core_cli_abstractions::{Logger, LoggingError, Spinner};
-use std::sync::Mutex;
 use super::cliclack_prompt_service::CliclackPromptService;
 use super::cliclack_spinner::CliclackSpinner;
+use n_framework_core_cli_abstractions::{Logger, LoggingError, Spinner};
+use std::sync::Mutex;
 
 impl Logger for CliclackPromptService {
     fn intro(&self, message: &str) -> Result<(), LoggingError> {

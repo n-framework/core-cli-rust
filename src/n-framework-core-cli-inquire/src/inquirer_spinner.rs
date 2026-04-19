@@ -1,6 +1,6 @@
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::RwLock;
 use n_framework_core_cli_abstractions::Spinner;
+use std::sync::RwLock;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 pub(crate) struct InquirerConsoleSpinner {
     pub(crate) message: RwLock<String>,
