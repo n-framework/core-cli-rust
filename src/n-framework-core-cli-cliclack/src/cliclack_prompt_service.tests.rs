@@ -31,7 +31,7 @@ fn test_cliclack_map_error() {
     assert_eq!(*mapped.kind(), InteractiveErrorKind::Cancelled);
     assert_eq!(mapped.message(), "context");
 
-    let err = io::Error::new(io::ErrorKind::Other, "boom");
+    let err = io::Error::other("boom");
     let mapped = CliclackPromptService::map_cliclack_error(err, "context");
     assert_eq!(*mapped.kind(), InteractiveErrorKind::Io);
     assert!(mapped.message().contains("context: boom"));
