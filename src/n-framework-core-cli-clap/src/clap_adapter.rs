@@ -70,6 +70,12 @@ fn build_command(spec: &CliCommandSpec) -> ClapCommand {
     if let Some(about) = &spec.about {
         command = command.about(about.clone());
     }
+    if let Some(long_about) = &spec.long_about {
+        command = command.long_about(long_about.clone());
+    }
+    if let Some(after_help) = &spec.after_help {
+        command = command.after_help(after_help.clone());
+    }
     if spec.require_subcommand {
         command = command
             .subcommand_required(true)
